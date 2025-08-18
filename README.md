@@ -8,12 +8,19 @@ The core of this project is the `/quizme` command, designed to provide an intera
 
 ### How it Works
 
-The `/quizme` command is implemented in the `slash_commands.py` file. The `quiz_me` function takes two arguments:
+The `/quizme` command is implemented in the `slash_commands.py` file. The `quiz_me` function takes the following arguments:
 
 -   `question_style`: The style of questions you want to be asked (e.g., "multiple choice", "flashcard").
 -   `topic`: The topic you want to be quizzed on (e.g., "CCNP", "Security").
+-   `num_questions`: The number of questions to ask (default is 10).
 
-The command will then fetch questions from the `question_bank.py` file and present them to the user. After the quiz, the user will receive a score. If the score is below 50%, the command will automatically generate GNS3 configuration files to help the user practice the topic they are struggling with.
+The command will then fetch questions from the `question_bank` directory and present them to the user. After the quiz, the user will receive a score. If the user misses more than 5 questions, the command will automatically generate GNS3 configuration files to help the user practice the topic they are struggling with.
+
+## What's New
+
+*   **Interactive Topic Selection:** The `/quizme` command is now more interactive. When you run it without any arguments, it will display a welcome message and a list of available topics. This makes it easier to discover the available quiz topics.
+
+*   **User-Contributed Questions:** We have moved away from unreliable, auto-generated questions. Now, you can contribute your own questions to the quiz by adding them to the question bank. See the `INSTRUCTIONS.md` file for more details.
 
 ## GNS3 Configuration Generation
 
@@ -34,9 +41,10 @@ This project also includes several other slash commands:
 
 -   `.gemini/commands/`: Contains the `.toml` files that define the custom Gemini CLI slash commands.
 -   `slash_commands.py`: Implements the Python functions for the slash commands, including `quiz_me`.
--   `question_bank.py`: Contains the questions and answers for the quizzes.
--   `gns3_topology.py`: Defines the GNS3 network topology for the labs.
+-   `question_bank/`: Contains the questions and answers for the quizzes, organized by domain.
+-   `gns3_topology.json`: Defines the GNS3 network topology for the labs.
 -   `GNS3_INSTRUCTIONS.md`: Provides instructions on how to use the generated GNS3 configuration files.
+-   `INSTRUCTIONS.md`: Provides instructions on how to add your own questions to the quiz.
 -   `test_quiz.py`: Contains unit tests for the quiz functionality.
 -   `scraper.py`: A script that uses the `/ddg` command to scrape news from a website.
 -   `requirements.txt`: Lists the project's Python dependencies.
@@ -68,5 +76,5 @@ To get this project up and running, follow these steps:
 
 Once the project is set up, you can interact with it through the Gemini CLI using the defined slash commands. The main command is `/quizme`:
 
--   **`/quizme`**: Starts an interactive quiz. You can specify the `question_style` and `topic`.
-    -   Example: `/quizme question_style="multiple choice" topic="OSPF"`
+-   **`/quizme`**: Starts an interactive quiz. You can specify the `question_style`, `topic`, and `num_questions`.
+    -   Example: `/quizme question_style="multiple choice" topic="OSPF" num_questions=5`

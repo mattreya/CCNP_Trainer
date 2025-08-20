@@ -10,7 +10,6 @@ from typing import Optional
 
 from duckduckgo_mcp_server.server import DuckDuckGoSearcher
 from mcp.server.fastmcp import Context
-from bandit.cli import main as bandit_main
 
 # Mock Context class for our simple client
 class MockContext(Context):
@@ -30,27 +29,6 @@ class StringIOWithNoName(io.StringIO):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.name = None
-
-async def run_bandit(path="."):
-
-    print(f"Running bandit on: {path}")
-    
-    # Create a StringIOWithNoName object to capture output
-    captured_output = StringIOWithNoName()
-    output = ""
-    
-    # Run Bandit as a subprocess
-    command = [sys.executable, '-m', 'bandit', '-r', path, '-f', 'txt']
-    process = subprocess.run(command, capture_output=True, text=True)
-
-    print(process.stdout)
-    if process.stderr:
-        print(process.stderr)
-
-    if process.returncode == 0:
-        print("Bandit scan completed. No issues found.")
-    else:
-        print(f"Bandit scan completed. Issues found (exit code: {process.returncode}).")
 
 async def perform_duckduckgo_search(query: str):
     searcher = DuckDuckGoSearcher()
@@ -129,16 +107,9 @@ def get_question_bank_path(topic):
         return None
     return os.path.join("question_bank", domain, f"{topic.lower()}.json")
 
-def quiz_me(question_style: str = "multiple choice", topic: Optional[str] = None, num_questions: int = 10):
-    if not topic:
-        print("Welcome to the CCNP Trainer Quiz!")
-        print("Please choose a topic to get started.")
-        print("\nAvailable topics:")
-        for t in TOPIC_TO_DOMAIN.keys():
-            print(f"- {t}")
-        print("\nTo start a quiz, use the command: /quizme topic=\"<topic_name>\"")
-        return
+QUIZ_STATE_FILE = "quiz_state.json"
 
+def start_quiz(topic: str, num_questions: int = 10):
     question_bank_path = get_question_bank_path(topic)
     if not question_bank_path or not os.path.exists(question_bank_path):
         return f"Topic '{topic}' not found in the question bank. Please add questions to the question bank first. See INSTRUCTIONS.md for more details."
@@ -156,30 +127,91 @@ def quiz_me(question_style: str = "multiple choice", topic: Optional[str] = None
     
     questions = random.sample(all_questions, num_questions)
 
-    score = 0
+    quiz_state = {
+        "topic": topic,
+        "questions": questions,
+        "score": 0,
+        "current_question_index": 0
+    }
 
-    for i, q in enumerate(questions):
-        print(f"Question {i+1}: {q['question']}")
-        if question_style == "multiple choice":
-            for option, text in q['options'].items():
-                print(f"  {option}: {text}")
-            user_answer = input("Your answer (A, B, C, or D): ").upper()
-        elif question_style == "flashcard":
-            input("Press Enter to see the answer.")
-            user_answer = q['answer'] # auto-correct for flashcards
-        else:
-            return f"Unsupported question style: {question_style}"
+    with open(QUIZ_STATE_FILE, "w") as f:
+        json.dump(quiz_state, f)
 
-        if user_answer == q['answer']:
-            print("Correct!")
-            score += 1
-        else:
-            print(f"Wrong! The correct answer is {q['answer']}.")
+    return ask_question()
 
-    final_score = (score / len(questions)) * 100
-    result = f"You scored {final_score:.2f}%. You answered {score} out of {len(questions)} questions correctly."
+def ask_question():
+    if not os.path.exists(QUIZ_STATE_FILE):
+        return "No active quiz. Please start a quiz first with /quizme topic=<topic_name>"
 
-    if (len(questions) - score) > 5:
-        result += "\n" + generate_gns3_config(topic)
+    with open(QUIZ_STATE_FILE, "r") as f:
+        quiz_state = json.load(f)
+
+    current_question_index = quiz_state["current_question_index"]
+    question = quiz_state["questions"][current_question_index]
+
+    question_text = f"Question {current_question_index + 1}: {question['question']}\n"
+    for option, text in question['options'].items():
+        question_text += f"  {option}: {text}\n"
+
+    return question_text
+
+def answer_question(user_answer: str):
+    if not os.path.exists(QUIZ_STATE_FILE):
+        return "No active quiz. Please start a quiz first with /quizme topic=<topic_name>"
+
+    with open(QUIZ_STATE_FILE, "r") as f:
+        quiz_state = json.load(f)
+
+    current_question_index = quiz_state["current_question_index"]
+    question = quiz_state["questions"][current_question_index]
+    correct_answer = question["answer"]
+
+    if user_answer.upper() == correct_answer:
+        quiz_state["score"] += 1
+        feedback = "Correct!"
+    else:
+        feedback = f"Wrong! The correct answer is {correct_answer}."
+
+    # Check if this is the last question *before* incrementing
+    if current_question_index + 1 >= len(quiz_state["questions"]):
+        quiz_state["current_question_index"] += 1 # Increment for final state
+        with open(QUIZ_STATE_FILE, "w") as f:
+            json.dump(quiz_state, f)
+        return f"{feedback}\n\n{get_quiz_results()}"
+    else:
+        quiz_state["current_question_index"] += 1
+        with open(QUIZ_STATE_FILE, "w") as f:
+            json.dump(quiz_state, f)
+        return f"{feedback}\n\n{ask_question()}"
+
+def get_quiz_results():
+    if not os.path.exists(QUIZ_STATE_FILE):
+        return "No active quiz. Please start a quiz first with /quizme topic=<topic_name>"
+
+    with open(QUIZ_STATE_FILE, "r") as f:
+        quiz_state = json.load(f)
+
+    score = quiz_state["score"]
+    num_questions = len(quiz_state["questions"])
+    final_score = (score / num_questions) * 100
+    result = f"You scored {final_score:.2f}%. You answered {score} out of {num_questions} questions correctly."
+
+    if (num_questions - score) >= 5:
+        result += "\n" + generate_gns3_config(quiz_state["topic"])
 
     return result
+
+async def quiz_me(topic: Optional[str] = None, answer: Optional[str] = None):
+    if not os.path.exists(QUIZ_STATE_FILE) and not topic:
+        return "Welcome to the CCNP Trainer Quiz!\n\nPlease choose a topic to get started.\n\nAvailable topics:\n" + "\n".join([f"- {t}" for t in TOPIC_TO_DOMAIN.keys()]) + "\n\nTo start a quiz, use the command: /quizme topic=\"<topic_name>\""
+    
+    if topic and not os.path.exists(QUIZ_STATE_FILE):
+        return start_quiz(topic)
+    
+    if os.path.exists(QUIZ_STATE_FILE) and answer:
+        return answer_question(answer)
+    
+    if os.path.exists(QUIZ_STATE_FILE) and not answer:
+        return ask_question()
+    
+    return "Invalid state. Please start a quiz with /quizme topic=\"<topic_name>\" or provide an answer to the current question."

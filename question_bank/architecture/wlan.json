@@ -1,0 +1,102 @@
+[
+    {
+        "question": "Which of the following is NOT a common enterprise network design principle?",
+        "options": {
+            "A": "Hierarchy",
+            "B": "Modularity",
+            "C": "Redundancy",
+            "D": "Complexity"
+        },
+        "answer": "D"
+    },
+    {
+        "question": "What is the primary purpose of a hierarchical network design?",
+        "options": {
+            "A": "To increase network complexity",
+            "B": "To make the network more difficult to manage",
+            "C": "To provide a predictable and scalable network",
+            "D": "To reduce the number of redundant links"
+        },
+        "answer": "C"
+    },
+    {
+        "question": "Which of the following is a key advantage of on-premises infrastructure over cloud infrastructure?",
+        "options": {
+            "A": "Higher scalability",
+            "B": "Reduced upfront costs",
+            "C": "Greater control over data and security",
+            "D": "Faster deployment of new services"
+        },
+        "answer": "C"
+    },
+    {
+        "question": "Which of the following best describes a characteristic of cloud infrastructure deployments?",
+        "options": {
+            "A": "High capital expenditure (CapEx)",
+            "B": "Pay-as-you-go operational expenditure (OpEx) model",
+            "C": "Full responsibility for hardware maintenance",
+            "D": "Limited access to global resources"
+        },
+        "answer": "B"
+    },
+    {
+        "question": "Which of the following is a key feature of Wi-Fi 6 (802.11ax)?",
+        "options": {
+            "A": "It only operates in the 2.4 GHz band.",
+            "B": "It supports a maximum channel width of 80 MHz.",
+            "C": "It allows multiple devices to access the wireless medium simultaneously.",
+            "D": "It has a maximum data rate of 100 Mbps per spatial stream."
+        },
+        "answer": "C"
+    },
+    {
+        "question": "What is a primary difference between autonomous APs and controller-based APs?",
+        "options": {
+            "A": "Autonomous APs require a WLAN controller for configuration.",
+            "B": "Controller-based APs are managed individually via a CLI or GUI.",
+            "C": "Autonomous APs are standalone and configured individually.",
+            "D": "Controller-based APs do not support PoE."
+        },
+        "answer": "C"
+    },
+    {
+        "question": "When a lightweight AP is configured in \"sniffer \" mode, what is one of its functions?",
+        "options": {
+            "A": "It forwards all captured 802.11 traffic to a network analyzer.",
+            "B": "It continues to provide wireless access to clients.",
+            "C": "It de-authenticates rogue clients.",
+            "D": "It only scans for interference sources."
+        },
+        "answer": "A"
+    },
+    {
+        "question": "In a WPA2 Enterprise environment, where does the \"supplicant\" role reside?",
+        "options": {
+            "A": "The RADIUS server",
+            "B": "The Wireless LAN Controller",
+            "C": "The access point",
+            "D": "The client device"
+        },
+        "answer": "D"
+    },
+    {
+        "question": "What is the primary cause of free space path loss?",
+        "options": {
+            "A": "Absorption",
+            "B": "Spreading of the signal",
+            "C": "Humidity",
+            "D": "Multipath"
+        },
+        "answer": "B"
+    },
+    {
+        "question": "What is the first step in a lightweight AP's state machine after it boots up?",
+        "options": {
+            "A": "Join a WLC",
+            "B": "Download a configuration",
+            "C": "Discover a WLC",
+            "D": "Build a CAPWAP tunnel"
+        },
+        "answer": "C"
+    }
+]

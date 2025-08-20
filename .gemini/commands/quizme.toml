@@ -1,3 +1,3 @@
 name = "quizme"
 description = "Starts an interactive quiz on CCNP ENCOR topics."
-command = "/home/matt/PycharmProjects/CCNP_Trainer/venv/bin/python -c \"import asyncio; from slash_commands import quizme; asyncio.run(quizme())\""
+command = '/home/matt/PycharmProjects/CCNP_Trainer/venv/bin/python /home/matt/PycharmProjects/CCNP_Trainer/run_quiz.py' 2>/dev/null
